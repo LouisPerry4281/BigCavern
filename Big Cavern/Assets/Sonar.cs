@@ -8,6 +8,9 @@ public class Sonar : MonoBehaviour
     [SerializeField] GameObject enemyDot;
     [SerializeField] GameObject wallDot;
 
+    [SerializeField] LayerMask enemyLayerMask;
+    [SerializeField] LayerMask wallLayerMask;
+
     [SerializeField] int sonarAngle; //Total scan angle
     [SerializeField] int sonarAccuracy; //No of rays
     [SerializeField] float sonarLength;
@@ -35,23 +38,26 @@ public class Sonar : MonoBehaviour
         float innerAngles = sonarAngle / sonarAccuracy;
 
         Vector2 currentDir = Quaternion.Euler(0, 0, sonarAngle / 2) * directionToCursor;
+        currentDir.Normalize();
 
         for (int i = 0; i < sonarAccuracy; i++)
         {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, currentDir, sonarLength);
-            currentDir = Quaternion.Euler(0, 0, innerAngles) * directionToCursor;
+            RaycastHit2D hit;
 
             //If enemy hit
-            if (hit.transform.gameObject.layer == 6)
+            if (hit = Physics2D.Raycast(transform.position, currentDir, sonarLength, enemyLayerMask))
             {
                 Instantiate(enemyDot, hit.point, Quaternion.identity);
             }
 
             //If wall hit
-            else if (hit.transform.gameObject.layer == 7)
+            else if (hit = Physics2D.Raycast(transform.position, currentDir, sonarLength, wallLayerMask))
             {
                 Instantiate(wallDot, hit.point, Quaternion.identity);
             }
+
+            currentDir = Quaternion.Euler(0, 0, innerAngles * i) * directionToCursor;
+            currentDir.Normalize();
         }
     }
 }
